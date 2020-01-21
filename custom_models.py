@@ -8,7 +8,7 @@ class Supervised_GM(Model):
     def __init__(self,Batch_Norm = False):
         super(Supervised_GM,self).__init__()
 
-        self.q_y__x_s = q_y__x(Batch_Norm)
+        self.q_y__x_s = q_y__x(False)
         self.q_k__y_s = q_k__y(Batch_Norm)
         self.p_y__k_s = p_y__k(Batch_Norm)
         self.q_z__y_x_s = q_z__y_x(Batch_Norm)

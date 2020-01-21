@@ -33,17 +33,18 @@ class EncoderUnetModule(layers.Layer):
         self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
 
-        self.bn = layers.BatchNormalization()
+        self.bn1 = layers.BatchNormalization()
+        self.bn2 = layers.BatchNormalization()
         self.Batch_Norm = Batch_Norm     
     def call(self,inputs,training = False):
         x = self.conv1(inputs)
         if self.Batch_Norm:
-            x = self.bn(x)
+            x = self.bn1(x)
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
         if self.Batch_Norm:
-            x = self.bn(x)
+            x = self.bn2(x)
         return x
 
 
@@ -62,7 +63,8 @@ class DecoderUnetModule(layers.Layer):
         self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
         
-        self.bn = layers.BatchNormalization()
+        self.bn1 = layers.BatchNormalization()
+        self.bn2 = layers.BatchNormalization()
         self.Batch_Norm = Batch_Norm     
     
     def call(self,inputs,training = False):
@@ -72,12 +74,12 @@ class DecoderUnetModule(layers.Layer):
         x = self.concat([x,skip])
         x = self.conv1(x)
         if self.Batch_Norm:
-            x = self.bn(x)
+            x = self.bn1(x)
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
         if self.Batch_Norm:
-            x = self.bn(x)
+            x = self.bn2(x)
         return x
 
 
@@ -224,12 +226,16 @@ class q_k__y(layers.Layer):
         
         k_sample = self.sampling((mean,log_var))
         
-        n_logp_k =  tf.reduce_mean(-self.unitGaussianLL(k_sample))
-        self.add_loss(n_logp_k)
+        #n_logp_k =  tf.reduce_mean(-self.unitGaussianLL(k_sample))
+        #self.add_loss(n_logp_k)
         
-        logq_k__y = tf.reduce_mean(self.gaussianLL((k_sample,mean,log_var)))
-        self.add_loss(logq_k__y)
+        #logq_k__y = tf.reduce_mean(self.gaussianLL((k_sample,mean,log_var)))
+        #self.add_loss(logq_k__y)
         
+        kl_loss =  - 0.5 * tf.reduce_mean(
+            log_var - tf.square(mean) - tf.exp(log_var) + 1)
+     
+        self.add_loss(kl_loss)
         return k_sample
 
 
@@ -282,11 +288,16 @@ class q_z__y_x(layers.Layer):
         
         z_sample = self.sampling((mean,log_var))
         
-        n_logp_z =  tf.reduce_mean(-self.unitGaussianLL(z_sample))
-        self.add_loss(n_logp_z)
+        #n_logp_z =  tf.reduce_mean(-self.unitGaussianLL(z_sample))
+        #self.add_loss(n_logp_z)
         
-        logq_z__x_y = tf.reduce_mean(self.gaussianLL((z_sample,mean,log_var)))
-        self.add_loss(logq_z__x_y)
+        #logq_z__x_y = tf.reduce_mean(self.gaussianLL((z_sample,mean,log_var)))
+        #self.add_loss(logq_z__x_y)
+        
+        kl_loss =  - 0.5 * tf.reduce_mean(
+            log_var - tf.square(mean) - tf.exp(log_var) + 1)
+     
+        self.add_loss(kl_loss)
         
         return z_sample
 
