@@ -9,18 +9,8 @@ import numpy as np
 #just import specific tool
 import tensorflow as tf
 
-# Parameters
-SHAPE = 64
-RGB = 3
-CLASSES = 21
-LATENT_DIM = 1
-TEMPERATURE = .1
-NUM_UNLABELED = 14212
-NUM_LABELED = 1456
-NUM_VALIDATION = 1457
-BS = 32 
+from param import SHAPE,RGB,CLASSES
 
-#Defines the augmentitations
 def get_training_augmentation():
     train_transform = [
         A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
@@ -90,10 +80,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
             X_un[n] = image
             n = n + 1
 
-        #return [self.X_s,self.Y_s,self.X_un] , self.Y_s
-        #return [X_s,Y_s],{'p_x__y_z_s':Y_s,'z_s_sample': Y_s,'p_y__k_s': Y_s,'k_s_sample':Y_s,'q_y__x_s':Y_s}
-        #return ([X_s, Y_s])
-        return ((X_s,Y_s),())
+        return ((X_s,Y_s,X_un),())
 
 
     def on_epoch_end():
@@ -147,7 +134,7 @@ def val_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
         #return [self.X_s, self.Y_s, self.X_un]
         #return [X_s,Y_s],[Y_s,Y_s,Y_s,Y_s,Y_s]
-        return ((X_s,Y_s),())
+        return ((X_s,Y_s,X_un),())
 
     def on_epoch_end():
         random.shuffle(image_path_list)

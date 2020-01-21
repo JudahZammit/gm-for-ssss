@@ -1,3 +1,5 @@
+from param import CLASSES,LATENT_DIM,RGB,TEMPERATURE
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import Model
@@ -21,34 +23,27 @@ config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
 
-# Parameters
-SHAPE = 64
-RGB = 3
-CLASSES = 21
-LATENT_DIM = 1
-TEMPERATURE = .1
-NUM_UNLABELED = 14212
-NUM_LABELED = 1456
-NUM_VALIDAITON = 1457
-
-            
-
-
 class EncoderUnetModule(layers.Layer):
     
-    def __init__(self,filterDim,dropout = 0.0):
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
         super(EncoderUnetModule,self).__init__()
         self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                                     padding='same')
         self.dropout = layers.Dropout(dropout)
         self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
-        
+
+        self.bn = layers.BatchNormalization()
+        self.Batch_Norm = Batch_Norm     
     def call(self,inputs,training = False):
         x = self.conv1(inputs)
+        if self.Batch_Norm:
+            x = self.bn(x)
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
+        if self.Batch_Norm:
+            x = self.bn(x)
         return x
 
 
@@ -56,7 +51,7 @@ class EncoderUnetModule(layers.Layer):
 
 class DecoderUnetModule(layers.Layer):
     
-    def __init__(self,filterDim,dropout = 0.0):
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
         super(DecoderUnetModule,self).__init__()
         
         self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
@@ -67,15 +62,22 @@ class DecoderUnetModule(layers.Layer):
         self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
         
+        self.bn = layers.BatchNormalization()
+        self.Batch_Norm = Batch_Norm     
+    
     def call(self,inputs,training = False):
         x = inputs[0]
         skip = inputs[1]
         x = self.deconv(x)
         x = self.concat([x,skip])
         x = self.conv1(x)
+        if self.Batch_Norm:
+            x = self.bn(x)
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
+        if self.Batch_Norm:
+            x = self.bn(x)
         return x
 
 
@@ -84,21 +86,21 @@ class DecoderUnetModule(layers.Layer):
 
 class Unet(layers.Layer):
     
-    def __init__(self):
+    def __init__(self,dropout = 0.0,Batch_Norm=False):
         super(Unet,self).__init__()
         
         self.pool = layers.MaxPooling2D((2, 2))
         
-        self.encoder16 = EncoderUnetModule(16)
-        self.encoder32 = EncoderUnetModule(32)
-        self.encoder64 = EncoderUnetModule(64)
-        self.encoder128 = EncoderUnetModule(128)
-        self.encoder256 = EncoderUnetModule(256)
+        self.encoder16 = EncoderUnetModule(16,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.encoder32 = EncoderUnetModule(32,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.encoder64 = EncoderUnetModule(64,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.encoder128 = EncoderUnetModule(128,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.encoder256 = EncoderUnetModule(256,dropout = dropout,Batch_Norm=Batch_Norm)
         
-        self.decoder128 = DecoderUnetModule(128)
-        self.decoder64 = DecoderUnetModule(64)
-        self.decoder32 = DecoderUnetModule(32)
-        self.decoder16 = DecoderUnetModule(16)
+        self.decoder128 = DecoderUnetModule(128,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.decoder64 = DecoderUnetModule(64,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.decoder32 = DecoderUnetModule(32,dropout = dropout,Batch_Norm=Batch_Norm)
+        self.decoder16 = DecoderUnetModule(16,dropout = dropout,Batch_Norm=Batch_Norm)
         
         
     def call(self,inputs):
@@ -180,40 +182,32 @@ class IouCoef(layers.Layer):
 
 # In[14]:
 
-
-class q_y__x_s(layers.Layer):
+# This layer has no loss, it is required for you to add one after calling it
+class q_y__x(layers.Layer):
     
-    def __init__(self):
-        super(q_y__x_s,self).__init__()
-        self.unet = Unet()
+    def __init__(self,Batch_Norm = False):
+        super(q_y__x,self).__init__()
+        self.unet = Unet(Batch_Norm = Batch_Norm)
         self.out = layers.Conv2D(CLASSES, (1, 1), activation='softmax')
-        self.cce = losses.CategoricalCrossentropy()
-        self.iou = IouCoef()
         
     def call(self,inputs):
-        supervised_mask,supervised_image = inputs
+        supervised_image = inputs
 
         
         unet_output = self.unet(supervised_image)
         cat_parameters = self.out(unet_output)
-        
-        logq_y__x = tf.reduce_mean(2000*self.cce(supervised_mask, cat_parameters))
-        self.add_loss(logq_y__x)
-        
-        iou = self.iou((supervised_mask,cat_parameters))
-        self.add_metric(iou,name='iou',aggregation='mean')
-        
+         
         return cat_parameters
 
 
 # In[15]:
 
 
-class q_k__y_s(layers.Layer):
+class q_k__y(layers.Layer):
     
-    def __init__(self):
-        super(q_k__y_s,self).__init__()
-        self.unet = Unet()
+    def __init__(self,Batch_Norm = False):
+        super(q_k__y,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
         self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
         self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
         
@@ -242,11 +236,11 @@ class q_k__y_s(layers.Layer):
 # In[16]:
 
 
-class p_y__k_s(layers.Layer):
+class p_y__k(layers.Layer):
     
-    def __init__(self):
-        super(p_y__k_s,self).__init__()
-        self.unet = Unet()
+    def __init__(self,Batch_Norm = False):
+        super(p_y__k,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
         self.out = layers.Conv2D(CLASSES, (1, 1), activation='softmax')
         self.cce = losses.CategoricalCrossentropy()
         
@@ -265,11 +259,11 @@ class p_y__k_s(layers.Layer):
 # In[17]:
 
 
-class q_z__y_x_s(layers.Layer):
+class q_z__y_x(layers.Layer):
     
-    def __init__(self):
-        super(q_z__y_x_s,self).__init__()
-        self.unet = Unet()
+    def __init__(self,Batch_Norm = False):
+        super(q_z__y_x,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
         self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
         self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
         
@@ -300,11 +294,11 @@ class q_z__y_x_s(layers.Layer):
 # In[18]:
 
 
-class p_x__y_z_s(layers.Layer):
+class p_x__y_z(layers.Layer):
     
-    def __init__(self):
-        super(p_x__y_z_s,self).__init__()
-        self.unet = Unet()
+    def __init__(self,Batch_Norm = False):
+        super(p_x__y_z,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
         self.out = layers.Conv2D(RGB, (1, 1), activation='sigmoid')
         self.concat = layers.Concatenate()
         self.bce = losses.BinaryCrossentropy()
@@ -323,8 +317,8 @@ class p_x__y_z_s(layers.Layer):
 
 # A function that generates samples from a set of categorical distributions 
 # in a way that the gradient can propagate through.
-def gumbel_softmax(args):
-    ind_multinomial = args
-    gumbel_dist = tfp.distributions.RelaxedOneHotCategorical(TEMPERATURE, probs=ind_multinomial)
-    return gumbel_dist.sample()
-
+class Gumbel(layers.Layer):
+    def call(self,inputs):
+        categorical = inputs
+        gumbel_dist = tfp.distributions.RelaxedOneHotCategorical(TEMPERATURE, probs=categorical)
+        return gumbel_dist.sample()

@@ -1,18 +1,9 @@
 from custom_models import Supervised_GM
 from data_generators import train_generator,val_generator
+from param import BN,BS,NUM_LABELED,NUM_VALIDATION
 
-# Parameters
-SHAPE = 64
-RGB = 3
-CLASSES = 21
-LATENT_DIM = 1
-TEMPERATURE = .1
-NUM_UNLABELED = 14212
-NUM_LABELED = 1456
-NUM_VALIDATION = 1457
-BS = 32 
 
-model = Supervised_GM() 
+model = Supervised_GM(Batch_Norm = BN) 
   
 model.compile('Adam')  
  

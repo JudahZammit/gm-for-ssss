@@ -1,29 +1,20 @@
-from custom_models import Supervised_GM
+from custom_models import GM
 from data_generators import train_generator,val_generator
+import tensorflow as tf
+from param import LR,BS,BN,NUM_LABELED,NUM_UNLABELED,NUM_VALIDATION
 
-# Parameters
-SHAPE = 64
-RGB = 3
-CLASSES = 21
-LATENT_DIM = 1
-TEMPERATURE = .1
-NUM_UNLABELED = 14212
-NUM_LABELED = 1456
-NUM_VALIDATION = 1457
-BS = 32 
-
-model = Supervised_GM() 
+model = GM(Batch_Norm = BN) 
   
-model.compile('Adam')  
+model.compile(tf.keras.optimizers.Adam(lr=LR,clipnorm = 1.,clipvalue = 0.5))  
  
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  
  
 model.fit(x = train_gen, 
-                    steps_per_epoch = NUM_LABELED//BS, 
+                    steps_per_epoch = NUM_UNLABELED//BS, 
                     epochs=100, 
                    validation_data = val_gen, 
                    validation_steps = NUM_VALIDATION//BS, 
-                     validation_freq= 10) 
+                     validation_freq= 1) 
 
 
