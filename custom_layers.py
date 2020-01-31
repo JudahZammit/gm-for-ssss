@@ -23,121 +23,8 @@ config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
 
-class EncoderUnetModule(layers.Layer):
-    
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
-        super(EncoderUnetModule,self).__init__()
-        self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
-                                    padding='same')
-        self.dropout = layers.Dropout(dropout)
-        self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
-                            padding='same')
-
-        self.bn1 = layers.BatchNormalization()
-        self.bn2 = layers.BatchNormalization()
-        self.Batch_Norm = Batch_Norm     
-    def call(self,inputs,training = False):
-        x = self.conv1(inputs)
-        if self.Batch_Norm:
-            x = self.bn1(x)
-        if training:
-            x = self.dropout(x)
-        x = self.conv2(x)
-        if self.Batch_Norm:
-            x = self.bn2(x)
-        return x
 
 
-
-
-class DecoderUnetModule(layers.Layer):
-    
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
-        super(DecoderUnetModule,self).__init__()
-        
-        self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
-        self.concat = layers.Concatenate()
-        self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
-                            padding='same')
-        self.dropout = layers.Dropout(dropout)
-        self.conv2 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
-                            padding='same')
-        
-        self.bn1 = layers.BatchNormalization()
-        self.bn2 = layers.BatchNormalization()
-        self.Batch_Norm = Batch_Norm     
-    
-    def call(self,inputs,training = False):
-        x = inputs[0]
-        skip = inputs[1]
-        x = self.deconv(x)
-        x = self.concat([x,skip])
-        x = self.conv1(x)
-        if self.Batch_Norm:
-            x = self.bn1(x)
-        if training:
-            x = self.dropout(x)
-        x = self.conv2(x)
-        if self.Batch_Norm:
-            x = self.bn2(x)
-        return x
-
-
-# In[9]:
-
-
-class Unet(layers.Layer):
-    
-    def __init__(self,dropout = 0.0,Batch_Norm=False):
-        super(Unet,self).__init__()
-        
-        self.pool = layers.MaxPooling2D((2, 2))
-        
-        self.encoder16 = EncoderUnetModule(16,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.encoder32 = EncoderUnetModule(32,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.encoder64 = EncoderUnetModule(64,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.encoder128 = EncoderUnetModule(128,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.encoder256 = EncoderUnetModule(256,dropout = dropout,Batch_Norm=Batch_Norm)
-        
-        self.decoder128 = DecoderUnetModule(128,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.decoder64 = DecoderUnetModule(64,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.decoder32 = DecoderUnetModule(32,dropout = dropout,Batch_Norm=Batch_Norm)
-        self.decoder16 = DecoderUnetModule(16,dropout = dropout,Batch_Norm=Batch_Norm)
-        
-        
-    def call(self,inputs):
-        e16 = self.encoder16(inputs)
-        p16 = self.pool(e16)
-        e32 = self.encoder32(p16)
-        p32 = self.pool(e32)
-        e64 = self.encoder64(p32)
-        p64 = self.pool(e64)
-        e128 = self.encoder128(p64)
-        p128 = self.pool(e128)
-        e256 = self.encoder256(p128)
-        
-        d128 = self.decoder128([e256,e128])
-        d64 = self.decoder64([d128,e64])
-        d32 = self.decoder32([d64,e32])
-        d16 = self.decoder16([d32,e16])
-        
-        return d16     
-
-
-# In[10]:
-
-
-class GaussianSampling(layers.Layer):
-  """Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""
-
-  def call(self, inputs):
-    z_mean, z_log_var = inputs
-    epsilon = tf.keras.backend.random_normal(shape=tf.keras.backend.shape(z_mean))
-    z_sample = z_mean + tf.keras.backend.exp(0.5 * z_log_var) * epsilon
-    return z_sample
-
-
-# In[11]:
 
 
 class GaussianLL(layers.Layer):
@@ -201,19 +88,42 @@ class q_y__x(layers.Layer):
          
         return cat_parameters
 
+# This layer has no loss, it is required for you to add one after calling it
+class q_y__x_a(layers.Layer):
+    
+    def __init__(self,Batch_Norm = False):
+        super(q_y__x_a,self).__init__()
+        self.unet = Unet(Batch_Norm = Batch_Norm)
+        self.out = layers.Conv2D(CLASSES, (1, 1), activation='softmax')
+        self.concat = layers.Concatenate()
+        
+    def call(self,inputs):
+        supervised_image,a_sample = inputs
+        concat = self.concat([supervised_image,a_sample])
+        
+        unet_output = self.unet(concat)
+        cat_parameters = self.out(unet_output)
+         
+        return cat_parameters
 
 # In[15]:
 
 
 class q_k__y(layers.Layer):
     
-    def __init__(self,Batch_Norm = False):
+    def __init__(self,Batch_Norm = False,sampling = "gaussian"):
         super(q_k__y,self).__init__()
         self.unet = Unet(Batch_Norm =Batch_Norm)
         self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
         self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
         
-        self.sampling = GaussianSampling()
+        if sampling == "gaussian":
+            self.sampling = GaussianSampling()
+
+        if sampling == "point":
+            self.sampling = PointSampling()
+
+
         self.gaussianLL = GaussianLL()
         self.unitGaussianLL = UnitGaussianLL() 
         
@@ -226,16 +136,16 @@ class q_k__y(layers.Layer):
         
         k_sample = self.sampling((mean,log_var))
         
-        #n_logp_k =  tf.reduce_mean(-self.unitGaussianLL(k_sample))
-        #self.add_loss(n_logp_k)
+        if sampling == "point":
+            n_logp_k =  tf.reduce_mean(-self.unitGaussianLL(k_sample))
+            self.add_loss(n_logp_k)
         
-        #logq_k__y = tf.reduce_mean(self.gaussianLL((k_sample,mean,log_var)))
-        #self.add_loss(logq_k__y)
-        
-        kl_loss =  - 0.5 * tf.reduce_mean(
-            log_var - tf.square(mean) - tf.exp(log_var) + 1)
-     
-        self.add_loss(kl_loss)
+        logq_k__y = tf.reduce_mean(self.gaussianLL((k_sample,mean,log_var)))
+        if sampling == "gaussian":
+            kl_loss =  - 0.5 * tf.reduce_mean(
+                log_var - tf.square(mean) - tf.exp(log_var) + 1) 
+            self.add_loss(kl_loss)
+
         return k_sample
 
 
@@ -267,13 +177,18 @@ class p_y__k(layers.Layer):
 
 class q_z__y_x(layers.Layer):
     
-    def __init__(self,Batch_Norm = False):
+    def __init__(self,Batch_Norm = False,sampling = "gaussian"):
         super(q_z__y_x,self).__init__()
         self.unet = Unet(Batch_Norm =Batch_Norm)
         self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
         self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
         
-        self.sampling = GaussianSampling()
+        if sampling == "gaussian":
+            self.sampling = GaussianSampling()
+
+        if sampling == "point":
+            self.sampling = PointSampling()
+        
         self.gaussianLL = GaussianLL()
         self.unitGaussianLL = UnitGaussianLL()
         self.concat = layers.Concatenate()
@@ -301,6 +216,46 @@ class q_z__y_x(layers.Layer):
         
         return z_sample
 
+class q_z__y_x_a(layers.Layer):
+    
+    def __init__(self,Batch_Norm = False,sampling = "gaussian"):
+        super(q_z__y_x_a,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
+        self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        
+        if sampling == "gaussian":
+            self.sampling = GaussianSampling()
+
+        if sampling == "point":
+            self.sampling = PointSampling()
+        
+        self.gaussianLL = GaussianLL()
+        self.unitGaussianLL = UnitGaussianLL()
+        self.concat = layers.Concatenate()
+        
+    def call(self,inputs):
+        supervised_mask,supervised_image,a_sample = inputs
+        
+        concat = self.concat([supervised_mask,supervised_image,a_sample])
+        unet_output = self.unet(concat)
+        log_var = self.log_var_out(unet_output)
+        mean = self.mean_out(unet_output)
+        
+        z_sample = self.sampling((mean,log_var))
+        
+        #n_logp_z =  tf.reduce_mean(-self.unitGaussianLL(z_sample))
+        #self.add_loss(n_logp_z)
+        
+        #logq_z__x_y = tf.reduce_mean(self.gaussianLL((z_sample,mean,log_var)))
+        #self.add_loss(logq_z__x_y)
+        
+        kl_loss =  - 0.5 * tf.reduce_mean(
+            log_var - tf.square(mean) - tf.exp(log_var) + 1)
+     
+        self.add_loss(kl_loss)
+        
+        return z_sample
 
 # In[18]:
 
@@ -317,7 +272,7 @@ class p_x__y_z(layers.Layer):
     def call(self,inputs):
         supervised_image,supervised_mask,z_sample = inputs
 
-        concat = self.concat([supervised_image,supervised_mask,z_sample])
+        concat = self.concat([supervised_mask,z_sample])
         unet_output = self.unet(concat)
         bern_parameters = self.out(unet_output)
        
@@ -326,6 +281,87 @@ class p_x__y_z(layers.Layer):
         
         return bern_parameters
 
+class p_x__y_z_a(layers.Layer):
+    
+    def __init__(self,Batch_Norm = False):
+        super(p_x__y_z_a,self).__init__()
+        self.unet = Unet(Batch_Norm =Batch_Norm)
+        self.out = layers.Conv2D(RGB, (1, 1), activation='sigmoid')
+        self.concat = layers.Concatenate()
+        self.bce = losses.BinaryCrossentropy()
+        
+    def call(self,inputs):
+        supervised_image,supervised_mask,z_sample,a_sample = inputs
+
+        concat = self.concat([supervised_mask,z_sample,a_sample])
+        unet_output = self.unet(concat)
+        bern_parameters = self.out(unet_output)
+       
+        n_logp_x__y_z_a = tf.reduce_mean(self.bce(supervised_image, bern_parameters))
+        self.add_loss(n_logp_x__y_z_a)
+        
+        return bern_parameters
+
+class q_a__x(layers.Layer):
+
+    def __init__(self,Batch_Norm = False,sampling = "gaussian"):
+        super(q_a__x,self).__init__()
+        self.unet = Unet(Batch_Norm = Batch_Norm)
+        self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        
+        if sampling == "gaussian":
+            self.sampling = GaussianSampling()
+
+        if sampling == "point":
+            self.sampling = PointSampling()
+        self.gaussianLL = GaussianLL()
+        
+    def call(self,inputs):
+        image = inputs
+        unet_output = self.unet(image)
+        log_var = self.log_var_out(unet_output)
+        mean = self.mean_out(unet_output)
+        
+        a_sample = self.sampling((mean,log_var))
+        
+        logq_a__x = tf.reduce_mean(self.gaussianLL((a_sample,mean,log_var)))
+        self.add_loss(logq_a__x)
+
+        return a_sample
+
+class p_a__x_y_z(layers.Layer):
+
+    def __init__(self,Batch_Norm = False,sampling = "gaussian"):
+        super(p_a__x_y_z,self).__init__()
+        self.unet = Unet(Batch_Norm = Batch_Norm)
+        self.log_var_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        self.mean_out = layers.Conv2D(LATENT_DIM, (1, 1))
+        
+        if sampling == "gaussian":
+            self.sampling = GaussianSampling()
+
+        if sampling == "point":
+            self.sampling = PointSampling()
+
+        self.gaussianLL = GaussianLL()
+        self.concat = layers.Concatenate()
+
+    def call(self,inputs):
+        a_sample,image,mask,z_sample = inputs
+
+        concat = self.concat([image,mask,z_sample])
+        unet_output = self.unet(concat)
+        log_var = self.log_var_out(unet_output)
+        mean = self.mean_out(unet_output)
+        
+        a_dummy = self.sampling((mean,log_var))
+        
+        n_logp_a__x_y_z = tf.reduce_mean(-self.gaussianLL((a_sample,mean,log_var)))
+        self.add_loss(n_logp_a__x_y_z)
+
+        return a_dummy
+
 # A function that generates samples from a set of categorical distributions 
 # in a way that the gradient can propagate through.
 class Gumbel(layers.Layer):
@@ -333,3 +369,8 @@ class Gumbel(layers.Layer):
         categorical = inputs
         gumbel_dist = tfp.distributions.RelaxedOneHotCategorical(TEMPERATURE, probs=categorical)
         return gumbel_dist.sample()
+
+class PointSampling(layers.Layer):
+    def call(self,inputs):
+        mean,log_var = inputs
+        return mean
