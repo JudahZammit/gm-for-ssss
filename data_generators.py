@@ -5,10 +5,7 @@ import os
 import math
 import numpy as np
 
-#shouldn't have to import tf for data generation
-#just import specific tool
 import tensorflow as tf
-
 from param import SHAPE,RGB,CLASSES
 
 def get_training_augmentation():

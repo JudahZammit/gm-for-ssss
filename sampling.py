@@ -22,3 +22,18 @@ class GaussianSampling(layers.Layer):
     epsilon = tf.keras.backend.random_normal(shape=tf.keras.backend.shape(z_mean))
     z_sample = z_mean + tf.keras.backend.exp(0.5 * z_log_var) * epsilon
     return z_sample
+
+# A function that generates samples from a set of categorical distributions
+# in a way that the gradient can propagate through.
+class Gumbel(layers.Layer):
+    def call(self,inputs):
+        categorical = inputs
+        gumbel_dist = tfp.distributions.RelaxedOneHotCategorical(TEMPERATURE, probs=categorical)
+        return gumbel_dist.sample()
+
+# Add comment
+class PointSampling(layers.Layer):
+    def call(self,inputs):
+        mean,log_var = inputs
+        return mean
+
