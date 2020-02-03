@@ -1,13 +1,17 @@
-from custom_layers import (q_y__x,q_k__y,p_y__k,q_z__y_x,p_x__y_z,IouCoef,Gumbel)
+from metrics import IouCoef
+from sampling import Gumbel
+from hephaestus_layers import (q_k__y,p_y__k,p_x__y_z,
+    q_a__x,q_y__x_a,q_z__y_x_a,p_a__x_y_z)
+
 from tensorflow.keras import Model,losses
 import tensorflow as tf
 from param import TEMPERATURE,CLASS_WEIGHT
-from custom_layers import (q_a__x,q_y__x_a,q_z__y_x_a,p_a__x_y_z,)
+
 
 class Hephaestus(Model):
 
     def __init__(self,Batch_Norm = False):
-        super(ADGM,self).__init__()
+        super(Hephaestus,self).__init__()
         
         self.q_y__x_a = q_y__x_a(Batch_Norm)
         self.q_k__y = q_k__y(Batch_Norm)

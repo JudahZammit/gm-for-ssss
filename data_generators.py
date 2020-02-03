@@ -4,6 +4,7 @@ import random
 import os
 import math
 import numpy as np
+import gc
 
 import tensorflow as tf
 from param import SHAPE,RGB,CLASSES
@@ -62,9 +63,9 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
             #cat_label -> image
             Y_s[n] = categorical_label[:,:,0:CLASSES]
             n = n + 1
-
+    
         n = 0
-
+        
         for x in unsupervised_path_list[i*batch_size:(i+1)*batch_size]:
 
             image = np.array(Image.open('./VOCdevkit/VOC2012/JPEGImages/' + x))
@@ -95,7 +96,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
         else:
             on_epoch_end()
             i = 0
-
+        gc.collect()
         yield getitem(i)
 
 

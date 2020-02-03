@@ -1,11 +1,20 @@
-from custom_models import Supervised_GM
+from dionysus_model import Supervised_Dionysus
 from data_generators import train_generator,val_generator
-from param import BN,BS,NUM_LABELED,NUM_VALIDATION
+import tensorflow as tf
+from param import LR,BS,BN,NUM_LABELED,NUM_UNLABELED,NUM_VALIDATION
 
 
-model = Supervised_GM(Batch_Norm = BN) 
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
+
+model = Supervised_Dionysus(Batch_Norm = BN) 
   
-model.compile('Adam')  
+model.compile(tf.keras.optimizers.Adam(lr=LR,clipnorm = 1.,clipvalue = 0.5))
+
  
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  

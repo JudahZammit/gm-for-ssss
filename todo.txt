@@ -1,0 +1,9 @@
+Refactor rest of models
+Why does BN hurt performance
+Refactor all layers to better support now model
+get point sampling working
+save unet weights
+Create new model
+Fix param.py
+Use python modules
+

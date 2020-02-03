@@ -1,9 +1,16 @@
-from custom_models import ADGM
+from hephaestus_model import Hephaestus
 from data_generators import train_generator,val_generator
 import tensorflow as tf
 from param import LR,BS,BN,NUM_LABELED,NUM_UNLABELED,NUM_VALIDATION
 
-model = ADGM(Batch_Norm = BN) 
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
+
+model = Hephaestus(Batch_Norm = BN) 
   
 model.compile(tf.keras.optimizers.Adam(lr=LR,clipnorm = 1.,clipvalue = 0.5))  
  

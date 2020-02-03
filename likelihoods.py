@@ -1,27 +1,6 @@
-from param import CLASSES,LATENT_DIM,RGB,TEMPERATURE
-
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Input,Conv2D,MaxPooling2D,UpSampling2D,concatenate
-from tensorflow.keras.losses import CategoricalCrossentropy
-import tensorflow_probability as tfp
-from tensorflow.keras import layers
-from tensorflow.keras import losses
-
-import numpy as np
-
-import os
 import math
-
-
-# Fixes fatal error
-from tensorflow.compat.v1 import ConfigProto
-likelihoodfrom tensorflow.compat.v1 import InteractiveSession
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
-
+from tensorflow.keras import layers
 
 class GaussianLL(layers.Layer):
 
