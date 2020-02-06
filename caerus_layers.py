@@ -20,7 +20,7 @@ class p_x__e1(layers.Layer):
 
         self.conv = layers.Conv2D(RGB,(1,1),
                 activation='sigmoid')
-        self.bce = BinaryCrossEntropy()
+        self.bce = BinaryCrossentropy()
             
     def call(self,inputs):
         image,e1 = inputs
@@ -100,7 +100,7 @@ class p_y__k1(layers.Layer):
                 activation='softmax')
     
         self.cce = CategoricalCrossentropy()
-
+        self.iou = IouCoef()
 
     def call(self,inputs):
         mask,k1_sample = inputs
@@ -109,6 +109,10 @@ class p_y__k1(layers.Layer):
 
         n_log_p_y__k1 = self.cce(mask,cat_param)
         self.add_loss(n_log_p_y__k1)
+
+        iou = self.iou((mask,cat_param))
+        self.add_metric(iou,name= 'IOU', aggregation= 'mean')
+
         
         return cat_param
 
@@ -691,3 +695,4 @@ class q_k5__k4(layers.Layer):
         self.add_loss(log_q_k5__k4)
 
         return k5_sample
+

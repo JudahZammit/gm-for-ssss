@@ -47,7 +47,7 @@ class PointDecoderLayer(layers.Layer):
         super(PointDecoderLayer,self).__init__()
 
         self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
-       self.concat = layers.Concatenate()
+        self.concat = layers.Concatenate()
         self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
         self.dropout = layers.Dropout(dropout)
@@ -109,7 +109,7 @@ class GaussianDecoderLayer(layers.Layer):
         super(GaussianDecoderLayer,self).__init__()
 
         self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
-       self.concat = layers.Concatenate()
+        self.concat = layers.Concatenate()
         self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                             padding='same')
         self.dropout = layers.Dropout(dropout)
