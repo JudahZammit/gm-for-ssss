@@ -1,6 +1,5 @@
-Refactor rest of models
 Why does BN hurt performance
-Refactor all layers to better support now model
+Refactor all layers to better support new model
 get point sampling working
 save unet weights
 Create new model
