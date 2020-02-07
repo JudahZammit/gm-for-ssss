@@ -13,7 +13,7 @@ class GaussianLL(layers.Layer):
         c = -.5 * math.log(2*math.pi)
         density = c - log_var/2 - ((x - mu)/(2*tf.keras.backend.exp(log_var) + 1e-8))*(x - mu)
 
-        return tf.keras.backend.sum(density,axis = -1)
+        return tf.keras.backend.mean(tf.keras.backend.sum(density,axis = -1))
 
 class UnitGaussianLL(layers.Layer):
 
@@ -24,5 +24,5 @@ class UnitGaussianLL(layers.Layer):
         c = -.5 * math.log(2*math.pi)
         density = c - x**2/2
 
-        return tf.keras.backend.sum(density,axis = -1)
+        return tf.keras.backend.mean(tf.keras.backend.sum(density,axis = -1))
 

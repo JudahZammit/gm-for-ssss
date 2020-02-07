@@ -29,9 +29,12 @@ class PointEncoderLayer(layers.Layer):
         self.Batch_Norm = Batch_Norm
         self.concat = layers.Concatenate()
         self.pool = layers.MaxPooling2D((2, 2))
-    
+        self.filterDim = filterDim
+
     def call(self,inputs,training = False):
         x = inputs 
+        if self.filterDim > 16:
+            x = self.pool(x)
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
@@ -83,8 +86,7 @@ class PointDecoderLayer(layers.Layer):
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
-        point_param = x #identity
-        return point_param
+        return x
 
 
 class GaussianEncoderLayer(layers.Layer):
@@ -101,9 +103,13 @@ class GaussianEncoderLayer(layers.Layer):
         self.bn2 = layers.BatchNormalization()
         self.Batch_Norm = Batch_Norm
         self.concat = layers.Concatenate()
+        self.pool = layers.MaxPooling2D((2, 2))
+        self.filterDim = filterDim
 
     def call(self,inputs,training = False):
         x = inputs
+        if self.filterDim > 16:
+            x = self.pool(x)
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
