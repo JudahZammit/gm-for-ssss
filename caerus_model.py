@@ -112,13 +112,13 @@ class Caerus(Model):
         out['e4_u'] = self.f_e4__e3(out['e3_u'])
 
         out['k1_sample_s'] = self.q_k1__y(y_s)
-        out['k2_sample_s'] = self.q_k2__k1(out['k2_sample_s'])
-        out['k3_sample_s'] = self.q_k3__k2(out['k3_sample_s'])
-        out['k4_sample_s'] = self.q_k4__k3(out['k4_sample_s']) 
-        out['k5_sample_s'] = self.q_k5__k4(out['k5_sample_s']) 
+        out['k2_sample_s'] = self.q_k2__k1(out['k1_sample_s'])
+        out['k3_sample_s'] = self.q_k3__k2(out['k2_sample_s'])
+        out['k4_sample_s'] = self.q_k4__k3(out['k3_sample_s']) 
+        out['k5_sample_s'] = self.q_k5__k4(out['k4_sample_s']) 
 
         out['k5_sample_u'] = self.q_k5__e4(
-                (out['e4_u'])) 
+            (out['e4_u'])) 
         out['k4_sample_u'] = self.q_k4__k5_e4(
                 (out['k5_sample_u'],out['e4_u'])) 
         out['k3_sample_u'] = self.q_k3__k4_e3(

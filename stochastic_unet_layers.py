@@ -28,11 +28,10 @@ class PointEncoderLayer(layers.Layer):
         self.bn2 = layers.BatchNormalization()
         self.Batch_Norm = Batch_Norm
         self.concat = layers.Concatenate()
+        self.pool = layers.MaxPooling2D((2, 2))
     
     def call(self,inputs,training = False):
         x = inputs 
-        if len(x) > 1:
-            x = self.concat(inputs[0])
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
@@ -62,11 +61,19 @@ class PointDecoderLayer(layers.Layer):
         self.skip = Skip
 
     def call(self,inputs,training = False):
-        x = inputs[0]
+        x,skip = inputs
+        
         if len(x) > 1:
             x = self.concat(x)
+        elif len(x) == 1:
+            x = x[0]
+
         if(self.skip):
-            skip = self.concat(inputs[1])
+            if len(skip) > 1:
+                skip = self.concat(skip)
+            elif len(skip) == 1:
+                skip = skip[0]
+        
         x = self.deconv(x)
         if(self.skip):
             x = self.concat([x,skip])
@@ -94,11 +101,9 @@ class GaussianEncoderLayer(layers.Layer):
         self.bn2 = layers.BatchNormalization()
         self.Batch_Norm = Batch_Norm
         self.concat = layers.Concatenate()
-    
+
     def call(self,inputs,training = False):
         x = inputs
-        if len(x) > 1:
-            x = self.concat(inputs[0])
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
@@ -128,14 +133,22 @@ class GaussianDecoderLayer(layers.Layer):
         self.skip = Skip
 
     def call(self,inputs,training = False):
-        x = inputs[0]
+        x,skip = inputs
+
         if len(x) > 1:
             x = self.concat(x)
+        elif len(x) == 1:
+            x = x[0]
+
         if(self.skip):
-            skip = self.concat(inputs[1])
+            if len(skip) > 1:
+                skip = self.concat(skip)
+            elif len(skip) == 1:
+                skip = skip[0]
         x = self.deconv(x)
         if(self.skip):
             x = self.concat([x,skip])
+     
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
