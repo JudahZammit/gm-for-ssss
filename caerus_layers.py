@@ -20,15 +20,12 @@ class p_x__e1(layers.Layer):
 
         self.conv = layers.Conv2D(RGB,(1,1),
                 activation='sigmoid')
-        self.bce = BinaryCrossentropy()
             
     def call(self,inputs):
-        image,e1 = inputs
+        e1 = inputs
     
         bern_param = self.conv(e1)
-        
-        n_log_p_x__e1 = self.bce(image,bern_param)
-        
+         
         return bern_param
 
 class f_d1__d2_z1_k1(layers.Layer):
@@ -100,20 +97,12 @@ class p_y__k1(layers.Layer):
                 activation='softmax')
     
         self.cce = CategoricalCrossentropy()
-        self.iou = IouCoef()
 
     def call(self,inputs):
-        mask,k1_sample = inputs
+        k1_sample = inputs
 
         cat_param = self.conv(k1_sample)
 
-        n_log_p_y__k1 = self.cce(mask,cat_param)
-        self.add_loss(n_log_p_y__k1)
-
-        iou = self.iou((mask,cat_param))
-        self.add_metric(iou,name= 'IOU', aggregation= 'mean')
-
-        
         return cat_param
 
 class p_k1__k2(layers.Layer):
@@ -134,7 +123,7 @@ class p_k1__k2(layers.Layer):
         self.add_loss(n_log_p_k1__k2)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_k1__k2 
 
 class p_k2__k3(layers.Layer):
 
@@ -154,7 +143,7 @@ class p_k2__k3(layers.Layer):
         self.add_loss(n_log_p_k2__k3)
 
         # return won't get used
-        return mean,logvar
+        return  n_log_p_k2__k3
 
 class p_k3__k4(layers.Layer):
 
@@ -174,7 +163,7 @@ class p_k3__k4(layers.Layer):
         self.add_loss(n_log_p_k3__k4)
 
         # return won't get used
-        return mean,logvar
+        return   n_log_p_k3__k4
 
 class p_k4__k5(layers.Layer):
 
@@ -194,7 +183,7 @@ class p_k4__k5(layers.Layer):
         self.add_loss(n_log_p_k4__k5)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_k4__k5
 
 class p_k5(layers.Layer):
 
@@ -210,7 +199,7 @@ class p_k5(layers.Layer):
         self.add_loss(n_log_p_k5)
 
         # return won't get used
-        return k5_sample
+        return n_log_k5 
 
 class p_z1__z2(layers.Layer):
 
@@ -230,7 +219,7 @@ class p_z1__z2(layers.Layer):
         self.add_loss(n_log_p_z1__z2)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_z1__z2
 
 class p_z2__z3(layers.Layer):
 
@@ -250,7 +239,7 @@ class p_z2__z3(layers.Layer):
         self.add_loss(n_log_p_z2__z3)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_z2__z3
 
 class p_z3__z4(layers.Layer):
 
@@ -270,7 +259,7 @@ class p_z3__z4(layers.Layer):
         self.add_loss(n_log_p_z3__z4)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_z3__z4
 
 class p_z4__z5(layers.Layer):
 
@@ -290,7 +279,7 @@ class p_z4__z5(layers.Layer):
         self.add_loss(n_log_p_z4__z5)
 
         # return won't get used
-        return mean,logvar
+        return n_log_p_z4__z5
 
 class p_z5(layers.Layer):
 
@@ -306,7 +295,7 @@ class p_z5(layers.Layer):
         self.add_loss(n_log_p_z5)
 
         # return won't get used
-        return z5_sample
+        return n_log_z5
 
 class f_e1__x(layers.Layer):
 

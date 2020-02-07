@@ -31,6 +31,8 @@ class PointEncoderLayer(layers.Layer):
     
     def call(self,inputs,training = False):
         x = inputs 
+        if len(x) > 1:
+            x = self.concat(inputs[0])
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
@@ -60,7 +62,9 @@ class PointDecoderLayer(layers.Layer):
         self.skip = Skip
 
     def call(self,inputs,training = False):
-        x = self.concat(inputs[0])
+        x = inputs[0]
+        if len(x) > 1:
+            x = self.concat(x)
         if(self.skip):
             skip = self.concat(inputs[1])
         x = self.deconv(x)
@@ -92,7 +96,9 @@ class GaussianEncoderLayer(layers.Layer):
         self.concat = layers.Concatenate()
     
     def call(self,inputs,training = False):
-        x = inputs 
+        x = inputs
+        if len(x) > 1:
+            x = self.concat(inputs[0])
         x = self.conv1(x)
         if self.Batch_Norm:
             x = self.bn1(x)
@@ -122,7 +128,9 @@ class GaussianDecoderLayer(layers.Layer):
         self.skip = Skip
 
     def call(self,inputs,training = False):
-        x = self.concat(inputs[0])
+        x = inputs[0]
+        if len(x) > 1:
+            x = self.concat(x)
         if(self.skip):
             skip = self.concat(inputs[1])
         x = self.deconv(x)
