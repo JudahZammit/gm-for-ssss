@@ -132,7 +132,7 @@ def val_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
         #return [self.X_s, self.Y_s, self.X_un]
         #return [X_s,Y_s],[Y_s,Y_s,Y_s,Y_s,Y_s]
-        return ((X_s,Y_s,X_un),())
+        return ((X_s,Y_s,X_s),())
 
     def on_epoch_end():
         random.shuffle(image_path_list)
