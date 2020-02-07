@@ -237,6 +237,85 @@ class Caerus(Model):
         self.add_loss(n_log_p_x__e1_s)
         self.add_loss(n_log_p_y__k1_s)
         self.add_metric(iou,name= 'IOU', aggregation= 'mean')
+        self.add_metric(n_log_p_x__e1_u,name= 
+                'Unsupervised reconstruction', aggregation= 'mean')
+        self.add_metric(n_log_p_x__e1_s,name= 
+                'Supervised reconstruction', aggregation= 'mean')
+        self.add_metric(n_log_p_y__k1_s,name=
+                'Superviesd mask reconstruction', aggregation= 'mean')
+    
+        return out
 
+class CaerusVae(Model):
+    
+    def __init__(self,dropout = 0.0,Batch_Norm = False):
+        super(CaerusVae,self).__init__()
+        
+        
+        self.p_y__k1 = p_y__k1(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        
+        self.p_k1__k2 = p_k1__k2(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.p_k2__k3 = p_k2__k3(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.p_k3__k4 = p_k3__k4(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.p_k4__k5 = p_k4__k5(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.p_k5 = p_k5(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+         
+        self.q_k1__y = q_k1__y(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.q_k2__k1 = q_k2__k1(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.q_k3__k2 = q_k3__k2(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.q_k4__k3 = q_k4__k3(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        self.q_k5__k4 = q_k5__k4(Batch_Norm = Batch_Norm, 
+                dropout = dropout)
+        
+        self.iou = IouCoef()
+        self.cce = CategoricalCrossentropy() 
+
+
+    def call(self,inputs):
+        x_s,y_s,x_u = inputs
+
+        #holds all the outputs
+        out = {}
+
+        # collect all samples from the inference network
+        out['k1_sample_s'] = self.q_k1__y(y_s)
+        out['k2_sample_s'] = self.q_k2__k1(out['k1_sample_s'])
+        out['k3_sample_s'] = self.q_k3__k2(out['k2_sample_s'])
+        out['k4_sample_s'] = self.q_k4__k3(out['k3_sample_s']) 
+        out['k5_sample_s'] = self.q_k5__k4(out['k4_sample_s']) 
+
+
+        # included as outputs to ensure that the 
+        # weights are traned
+        out['p_k1_s'] = self.p_k1__k2(
+                (out['k1_sample_s'],out['k2_sample_s']))
+        out['p_k2_s'] = self.p_k2__k3(
+                (out['k2_sample_s'],out['k3_sample_s']))
+        out['p_k3_s'] = self.p_k3__k4(
+                (out['k3_sample_s'],out['k4_sample_s']))
+        out['p_k4_s'] = self.p_k4__k5(
+                (out['k4_sample_s'],out['k5_sample_s']))
+        out['p_k5_s'] = self.p_k5(out['k5_sample_s'])
+
+
+        # these are the "real" outputs
+        out['y_s_reconstructed'] = self.p_y__k1(out['k1_sample_s'])
+         
+        n_log_p_y__k1_s = self.cce(y_s,out['y_s_reconstructed'])
+        
+        self.add_loss(n_log_p_y__k1_s)
+        self.add_metric(n_log_p_y__k1_s,name=
+                'Superviesd mask reconstruction', aggregation= 'mean')
+    
         return out
 
