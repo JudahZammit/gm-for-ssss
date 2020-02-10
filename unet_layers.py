@@ -34,8 +34,6 @@ class EncoderUnetModule(layers.Layer):
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
-        if self.Batch_Norm:
-            x = self.bn2(x)
         return x
 
 
@@ -67,8 +65,6 @@ class DecoderUnetModule(layers.Layer):
         if training:
             x = self.dropout(x)
         x = self.conv2(x)
-        if self.Batch_Norm:
-            x = self.bn2(x)
         return x
 
 class Unet(layers.Layer):
@@ -107,4 +103,5 @@ class Unet(layers.Layer):
         d16 = self.decoder16([d32,e16])
         
         return d16    
+
 

@@ -237,12 +237,6 @@ class Caerus(Model):
         self.add_loss(n_log_p_x__e1_s)
         self.add_loss(n_log_p_y__k1_s)
         self.add_metric(iou,name= 'IOU', aggregation= 'mean')
-        self.add_metric(n_log_p_x__e1_u,name= 
-                'Unsupervised reconstruction', aggregation= 'mean')
-        self.add_metric(n_log_p_x__e1_s,name= 
-                'Supervised reconstruction', aggregation= 'mean')
-        self.add_metric(n_log_p_y__k1_s,name=
-                'Superviesd mask reconstruction', aggregation= 'mean')
     
         return out
 
