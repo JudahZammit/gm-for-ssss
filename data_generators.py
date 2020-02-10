@@ -96,7 +96,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
         else:
             on_epoch_end()
             i = 0
-        gc.collect()
+        #gc.collect()
         yield getitem(i)
 
 

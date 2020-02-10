@@ -11,4 +11,4 @@ BS = 32
 BN = False #BAD!!!!!!!!!
 LR = .001
 CLASS_WEIGHT = 2000
-KL = 1
+KL = 1e-20
