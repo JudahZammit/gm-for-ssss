@@ -16,8 +16,8 @@ import math
 
 class PointEncoderLayer(layers.Layer):
 
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
-        super(PointEncoderLayer,self).__init__()
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,name = ''):
+        super(PointEncoderLayer,self).__init__(name = name)
         self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                                     padding='same')
         self.dropout = layers.Dropout(dropout)
@@ -47,8 +47,8 @@ class PointEncoderLayer(layers.Layer):
 
 class PointDecoderLayer(layers.Layer):
 
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,Skip = True):
-        super(PointDecoderLayer,self).__init__()
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,Skip = True,name = ''):
+        super(PointDecoderLayer,self).__init__(name = name)
 
         self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
         self.concat = layers.Concatenate()
@@ -91,8 +91,8 @@ class PointDecoderLayer(layers.Layer):
 
 class GaussianEncoderLayer(layers.Layer):
 
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False):
-        super(GaussianEncoderLayer,self).__init__()
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,name = ''):
+        super(GaussianEncoderLayer,self).__init__(name = name)
         self.conv1 = layers.Conv2D(filterDim, (3, 3), activation=tf.keras.activations.elu, kernel_initializer='he_normal',
                                     padding='same')
         self.dropout = layers.Dropout(dropout)
@@ -122,8 +122,8 @@ class GaussianEncoderLayer(layers.Layer):
 
 class GaussianDecoderLayer(layers.Layer):
 
-    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,Skip = True):
-        super(GaussianDecoderLayer,self).__init__()
+    def __init__(self,filterDim,dropout = 0.0,Batch_Norm=False,Skip = True,name = ''):
+        super(GaussianDecoderLayer,self).__init__(name = name)
 
         self.deconv = layers.Conv2DTranspose(filterDim, (2, 2), strides=(2, 2), padding='same')
         self.concat = layers.Concatenate()

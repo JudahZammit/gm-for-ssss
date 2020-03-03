@@ -16,15 +16,14 @@ session = InteractiveSession(config=config)
 model = Caerus(Batch_Norm = BN) 
 model.compile(tf.keras.optimizers.Adam(lr=LR,clipnorm = 1.,clipvalue = 0.5))  
 
-#model = tf.keras.models.load_model('Caerus.h5')
-
 
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  
 
 #nex = next(train_gen)
 #model.train_on_batch(nex[0],nex[1])
-#model.load_weights('Caerus_p9.h5')
+#model.load_weights('Caerus_e8.h5')
+
 
 # Saves the model best weights to a file 
 checkpoint = ModelCheckpoint(
@@ -38,7 +37,7 @@ checkpoint = ModelCheckpoint(
 )
 
 model.fit(x = train_gen, 
-                    steps_per_epoch = NUM_UNLABELED//BS, 
+                    steps_per_epoch = NUM_LABELED//BS, 
                     epochs=100, 
                    validation_data = val_gen, 
                    validation_steps = NUM_VALIDATION//BS, 

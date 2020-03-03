@@ -39,7 +39,7 @@ checkpoint = ModelCheckpoint(
 
 model.fit(x = train_gen, 
                     steps_per_epoch = NUM_LABELED//BS, 
-                    epochs=100, 
+                    epochs=1, 
                    validation_data = val_gen, 
                    validation_steps = NUM_VALIDATION//BS, 
                      validation_freq= 1,

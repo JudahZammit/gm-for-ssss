@@ -5,13 +5,13 @@ import os
 import math
 import numpy as np
 import gc
-
+import cv2
 import tensorflow as tf
 from param import SHAPE,RGB,CLASSES
 
 def get_training_augmentation():
     train_transform = [
-        A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
+        A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=cv2.BORDER_REPLICATE),
         A.Resize(height = SHAPE, width = SHAPE, interpolation=1, always_apply=True, p=1)
     ]
     return A.Compose(train_transform)
@@ -20,7 +20,7 @@ def get_training_augmentation():
 def get_validation_augmentation():
     """Add paddings to make image shape divisible by 32"""
     test_transform = [
-        A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0),
+        A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=cv2.BORDER_REPLICATE),
         A.Resize(height = SHAPE, width = SHAPE, interpolation=1, always_apply=True, p=1)
     ]
     return A.Compose(test_transform)
