@@ -197,7 +197,7 @@ class p_k5(layers.Layer):
         k5_sample = inputs
  
         n_log_p_k5 = -self.ll(k5_sample)
-        #self.add_loss(n_log_p_k5)
+        self.add_loss(n_log_p_k5)
 
         # return won't get used
         return n_log_p_k5 
@@ -293,7 +293,7 @@ class p_z5(layers.Layer):
         z5_sample = inputs
  
         n_log_p_z5 = -self.ll(z5_sample)
-        #self.add_loss(n_log_p_z5)
+        self.add_loss(n_log_p_z5)
 
         # return won't get used
         return n_log_p_z5
@@ -458,18 +458,8 @@ class q_z5__e4(layers.Layer):
         e4 = inputs
 
         mean,logvar = self.decoder(e4)
-        
-        z5_sample = self.sample((mean,logvar))
-        
-        kl_loss = (-.5)*1 + (-.5)*logvar - (-.5)*K.square(mean) - (-.5)*K.exp(logvar)
-        kl_loss = K.sum(kl_loss, axis=-1)
-        kl_loss = K.mean(kl_loss)
-        kl_loss *= self.KL
-        
-        log_q_z5__e4 = self.ll((z5_sample,mean,logvar))
-        self.add_loss(kl_loss)
 
-        return z5_sample
+        return mean
 
 class q_k1__k2_e1(layers.Layer):
 
@@ -575,17 +565,7 @@ class q_k5__e4(layers.Layer):
 
         mean,logvar = self.decoder(e4)
         
-        k5_sample = self.sample((mean,logvar))
-
-        kl_loss = (-.5)*1 + (-.5)*logvar - (-.5)*K.square(mean) - (-.5)*K.exp(logvar)
-        kl_loss = K.sum(kl_loss, axis=-1)
-        kl_loss = K.mean(kl_loss)
-        kl_loss *= self.KL
-
-        log_q_k5__e4 = self.ll((k5_sample,mean,logvar))
-        self.add_loss(kl_loss)
-
-        return k5_sample
+        return mean
 
 
 class q_k1__y(layers.Layer):
@@ -692,15 +672,5 @@ class q_k5__k4(layers.Layer):
     
         mean,logvar = self.encoder(k4_sample)
         
-        k5_sample = self.sample((mean,logvar))
-        
-        kl_loss = (-.5)*1 + (-.5)*logvar - (-.5)*K.square(mean) - (-.5)*K.exp(logvar)
-        kl_loss = K.sum(kl_loss, axis=-1)
-        kl_loss = K.mean(kl_loss)
-        kl_loss *= self.KL
-
-        log_q_k5__k4 = self.ll((k5_sample,mean,logvar))
-        self.add_loss(kl_loss)
-
-        return k5_sample
+        return mean
 

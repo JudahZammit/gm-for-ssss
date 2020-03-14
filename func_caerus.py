@@ -22,7 +22,8 @@ def display_val(display_list,epoch):
   for i in range(len(display_list)):
     plt.subplot(1, len(display_list), i+1)
     plt.title(title[i])
-    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]))
+    cmap =  plt.get_cmap('jet', 21)
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap)
     plt.axis('off')
   plt.savefig("./epoch_"+str(epoch)+".png")
 
@@ -35,7 +36,8 @@ def display_train(display_list):
   for i in range(len(display_list)):
     plt.subplot(1, len(display_list), i+1)
     plt.title(title[i])
-    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]))
+    cmap =  plt.get_cmap('jet', 21)
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap   )
     plt.axis('off')
   plt.show()
 
@@ -80,8 +82,8 @@ checkpoint = ModelCheckpoint(
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  
 df = pd.DataFrame(columns = ['Total Loss', 'Reconstruction Loss','Val IOU'])
-for i in range(51):
-    KL = min(1,i,2**(i-50))
+for i in range(201):
+    KL = min(1,i/201)
 
     print('\n\n\n')
     print('Starting epoch'+str(i))
@@ -96,7 +98,7 @@ for i in range(51):
         model.train_on_batch(nex[0],nex[1])
         model.load_weights('FuncCaerus.h5')
     if(KL == 1):
-        epochs = 10
+        epochs = 100
     elif(KL == 0):
         epochs = 10
     else:
