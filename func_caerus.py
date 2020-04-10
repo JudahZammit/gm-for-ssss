@@ -19,10 +19,12 @@ def display_val(display_list,epoch):
 
   title = ['Input Image', 'True Mask', 'Reconstructed Mask','Reconstructed Image','Predicted Mask']
 
+    
+
   for i in range(len(display_list)):
     plt.subplot(1, len(display_list), i+1)
     plt.title(title[i])
-    cmap =  plt.get_cmap('jet', 21)
+    cmap =  plt.get_cmap('magma', 21)
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap)
     plt.axis('off')
   plt.savefig("./epoch_"+str(epoch)+".png")
@@ -36,7 +38,7 @@ def display_train(display_list):
   for i in range(len(display_list)):
     plt.subplot(1, len(display_list), i+1)
     plt.title(title[i])
-    cmap =  plt.get_cmap('jet', 21)
+    cmap =  plt.get_cmap('magma', 21)
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap   )
     plt.axis('off')
   plt.show()
@@ -82,8 +84,8 @@ checkpoint = ModelCheckpoint(
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  
 df = pd.DataFrame(columns = ['Total Loss', 'Reconstruction Loss','Val IOU'])
-for i in range(201):
-    KL = min(1,i/201)
+for i in range(200,201):
+    KL = min(1,i/200)
 
     print('\n\n\n')
     print('Starting epoch'+str(i))
@@ -93,7 +95,7 @@ for i in range(201):
     model = FuncCaerus(Batch_Norm = BN,Kull = KL) 
     model.compile(opt)  
      
-    if i > 0:
+    if False:
         nex = next(train_gen)
         model.train_on_batch(nex[0],nex[1])
         model.load_weights('FuncCaerus.h5')

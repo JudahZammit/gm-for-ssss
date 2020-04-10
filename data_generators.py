@@ -51,7 +51,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
         for x in image_path_list[i*batch_size:(i+1)*batch_size]:
 
             image = np.array(Image.open('./VOCdevkit/VOC2012/train_frames/' + x))
-            label = np.array(Image.open('./VOCdevkit/VOC2012/train_masks/' + x.replace('.jpg','.png')))
+            label = np.array(Image.open('./VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
 
             sample = get_training_augmentation()(image=image, mask=label)
             image, label = sample['image']/255,sample['mask']
@@ -116,7 +116,7 @@ def val_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
         for x in image_path_list[i*batch_size:(i+1)*batch_size]:
 
             image = np.array(Image.open('./VOCdevkit/VOC2012/val_frames/' + x))
-            label = np.array(Image.open('./VOCdevkit/VOC2012/val_masks/' + x.replace('.jpg','.png')))
+            label = np.array(Image.open('./VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
 
             sample = get_validation_augmentation()(image=image, mask=label)
             image, label = sample['image']/255, sample['mask']
