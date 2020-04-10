@@ -1,8 +1,8 @@
-from tensorflow.keras import Model,layers,losses
-from unet_layers import Unet
-from metrics import IouCoef
+from layers.unet_layers import Unet
+from helpers.metrics import IouCoef
 from param import CLASSES
 
+from tensorflow.keras import Model,layers,losses
 
 class Unet_Model(Model):
 

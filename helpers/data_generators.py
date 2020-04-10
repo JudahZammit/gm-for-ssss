@@ -1,3 +1,5 @@
+from param import SHAPE,RGB,CLASSES
+
 import albumentations as A
 from PIL import Image
 import random 
@@ -7,7 +9,6 @@ import numpy as np
 import gc
 import cv2
 import tensorflow as tf
-from param import SHAPE,RGB,CLASSES
 
 def get_training_augmentation():
     train_transform = [
@@ -30,13 +31,13 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
     # Loads in unlabeled images(file paths) and repeats the labeled images until they're
     # are more labeled ones then unlabeled ones
-    image_path_list = os.listdir('./VOCdevkit/VOC2012/train_frames/')
-    unsupervised_path_list = os.listdir('./VOCdevkit/VOC2012/JPEGImages/')
+    image_path_list = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/train_frames/')
+    unsupervised_path_list = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/JPEGImages/')
 
     random.shuffle(image_path_list)
     random.shuffle(unsupervised_path_list)
 
-    lis = os.listdir('./VOCdevkit/VOC2012/train_frames/')
+    lis = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/train_frames/')
     while len(image_path_list) <= len(unsupervised_path_list):
         random.shuffle(lis)
         image_path_list.extend(lis)
@@ -50,8 +51,8 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
         for x in image_path_list[i*batch_size:(i+1)*batch_size]:
 
-            image = np.array(Image.open('./VOCdevkit/VOC2012/train_frames/' + x))
-            label = np.array(Image.open('./VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
+            image = np.array(Image.open('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/train_frames/' + x))
+            label = np.array(Image.open('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
 
             sample = get_training_augmentation()(image=image, mask=label)
             image, label = sample['image']/255,sample['mask']
@@ -68,7 +69,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
         
         for x in unsupervised_path_list[i*batch_size:(i+1)*batch_size]:
 
-            image = np.array(Image.open('./VOCdevkit/VOC2012/JPEGImages/' + x))
+            image = np.array(Image.open('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/JPEGImages/' + x))
 
             sample = get_training_augmentation()(image=image)
             image= sample['image']/255
@@ -83,8 +84,8 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
     def on_epoch_end():
         random.shuffle(unsupervised_path_list)
-        image_path_list = os.listdir('./VOCdevkit/VOC2012/train_frames/')
-        lis = os.listdir('./VOCdevkit/VOC2012/train_frames/')
+        image_path_list = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/train_frames/')
+        lis = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/train_frames/')
         while len(image_path_list) <= len(unsupervised_path_list):
             random.shuffle(lis)
             image_path_list.extend(lis)
@@ -103,7 +104,7 @@ def train_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
 def val_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
-    image_path_list = os.listdir('./VOCdevkit/VOC2012/val_frames/')
+    image_path_list = os.listdir('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/val_frames/')
     random.shuffle(image_path_list)
 
     X_s = np.zeros((batch_size, shape[1], shape[0], 3), dtype='float32')
@@ -115,8 +116,8 @@ def val_generator(batch_size = 64,shape = (SHAPE,SHAPE)):
 
         for x in image_path_list[i*batch_size:(i+1)*batch_size]:
 
-            image = np.array(Image.open('./VOCdevkit/VOC2012/val_frames/' + x))
-            label = np.array(Image.open('./VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
+            image = np.array(Image.open('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/val_frames/' + x))
+            label = np.array(Image.open('/home/judah/gm-for-ssss/data/VOCdevkit/VOC2012/SegmentationClass/' + x.replace('.jpg','.png')))
 
             sample = get_validation_augmentation()(image=image, mask=label)
             image, label = sample['image']/255, sample['mask']

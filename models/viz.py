@@ -1,9 +1,10 @@
-from caerus_layers import *
+from layers.caerus_layers import *
+from helpers.metrics import IouCoef
+from layers.stochastic_unet_layers import PointDecoderLayer,PointEncoderLayer
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import Model
-from metrics import IouCoef
-from stochastic_unet_layers import PointDecoderLayer,PointEncoderLayer
 from tensorflow.keras.utils import plot_model
 
 class FuncCaerus():

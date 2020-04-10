@@ -1,7 +1,8 @@
-from caerus_model import FuncCaerus
-from data_generators import train_generator,val_generator
-import tensorflow as tf
+from models.caerus_model import FuncCaerus
+from helpers.data_generators import train_generator,val_generator
 from param import LR,BS,BN,NUM_LABELED,NUM_UNLABELED,NUM_VALIDATION
+
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import ModelCheckpoint
 from matplotlib import pyplot as plt
@@ -27,7 +28,7 @@ def display_val(display_list,epoch):
     cmap =  plt.get_cmap('magma', 21)
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap)
     plt.axis('off')
-  plt.savefig("./epoch_"+str(epoch)+".png")
+  plt.savefig("./model_output/epoch_"+str(epoch)+".png")
 
 def display_train(display_list):
   plt.figure(figsize=(15, 15))
@@ -72,7 +73,7 @@ class DisplayTrainCallback(tf.keras.callbacks.Callback):
 
 # Saves the model best weights to a file 
 checkpoint = ModelCheckpoint(
-    'FuncCaerus.h5', 
+    './model_output/FuncCaerus.h5', 
     monitor='val_IOU', 
     verbose=0, 
     save_best_only=False, 

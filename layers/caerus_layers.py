@@ -1,4 +1,9 @@
 from param import CLASSES,LATENT_DIM,RGB,TEMPERATURE
+from layers.stochastic_unet_layers import (PointEncoderLayer,PointDecoderLayer,
+        GaussianEncoderLayer,GaussianDecoderLayer)
+from helpers.sampling import GaussianSampling
+from helpers.likelihoods import GaussianLL,UnitGaussianLL
+from helpers.metrics import IouCoef
 
 import tensorflow as tf
 from tensorflow import keras
@@ -8,11 +13,6 @@ from tensorflow.keras.losses import CategoricalCrossentropy, BinaryCrossentropy
 from tensorflow.keras import layers
 from tensorflow.keras import losses
 from tensorflow.keras import backend as K
-from stochastic_unet_layers import (PointEncoderLayer,PointDecoderLayer,
-        GaussianEncoderLayer,GaussianDecoderLayer)
-from sampling import GaussianSampling
-from likelihoods import GaussianLL,UnitGaussianLL
-from metrics import IouCoef
 
 class p_x__d1(layers.Layer):
 
