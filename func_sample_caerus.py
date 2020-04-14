@@ -1,4 +1,4 @@
-from models.caerus_func_model import FuncCaerus
+from models.caerus_func_sample_model import FuncSampleCaerus
 from helpers.data_generators import train_generator,val_generator
 from param import LR,BS,BN,NUM_LABELED,NUM_UNLABELED,NUM_VALIDATION
 
@@ -28,7 +28,7 @@ def display_val(display_list,epoch):
     cmap =  plt.get_cmap('magma', 21)
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]),cmap = cmap)
     plt.axis('off')
-  plt.savefig("./model_output/epoch_"+str(epoch)+".png")
+  plt.savefig("./model_output/FuncSampleCaerus/epoch_"+str(epoch)+".png")
 
 def display_train(display_list):
   plt.figure(figsize=(15, 15))
@@ -81,7 +81,7 @@ class DisplayTrainCallback(tf.keras.callbacks.Callback):
 
 # Saves the model best weights to a file 
 checkpoint = ModelCheckpoint(
-    './model_output/FuncCaerus.tf', 
+    './model_output/FuncSampleCaerus/FuncSampleCaerus.tf', 
     monitor='val_IOU', 
     verbose=0, 
     save_best_only=False, 
@@ -93,7 +93,7 @@ checkpoint = ModelCheckpoint(
 train_gen = train_generator(batch_size = BS) 
 val_gen = val_generator(batch_size = BS)  
 df = pd.DataFrame(columns = ['Total Loss', 'Reconstruction Loss','Val IOU'])
-for i in range(200,201):
+for i in range(0,201):
     KL = min(1,i/200)
 
     print('\n\n\n')
@@ -101,13 +101,13 @@ for i in range(200,201):
     print('KL: ' + str(KL))
     print('\n\n\n')
     opt = tf.keras.optimizers.Adam(lr=LR,clipnorm = 1.,clipvalue = 0.5)
-    model = FuncCaerus(Batch_Norm = BN,Kull = KL) 
+    model = FuncSampleCaerus(Batch_Norm = BN,Kull = KL) 
     model.compile(opt)  
      
     if KL > 0:
         nex = next(train_gen)
         model.train_on_batch(nex[0],nex[1])
-        model.load_weights('./model_output/FuncCaerus.tf')
+        model.load_weights('./model_output/FuncSampleCaerus/FuncSampleCaerus.tf')
     if(KL == 1):
         epochs = 100000
     elif(KL == 0):

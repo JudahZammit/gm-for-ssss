@@ -1,4 +1,4 @@
-from layers.caerus_layers import *
+from layers.caerus_skip_func_layers import *
 from helpers.metrics import IouCoef
 from layers.stochastic_unet_layers import PointDecoderLayer,PointEncoderLayer
 
@@ -6,14 +6,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import Model
 
-class Caerus(Model):
-    
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(Caerus,self).__init__()
+
+class SkipFuncCaerus(Model):
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0):
+        super(SkipFuncCaerus,self).__init__()
         
+        self.KL = Kull
         self.p_x__d1 = p_x__d1(
                 Batch_Norm = Batch_Norm, dropout = dropout)
-        
+
         self.f_d1__d2_z1_k1 = f_d1__d2_z1_k1(
                 Batch_Norm = Batch_Norm, dropout = dropout)
         self.f_d2__d3_z2_k2 = f_d2__d3_z2_k2(
@@ -22,82 +23,83 @@ class Caerus(Model):
                 Batch_Norm = Batch_Norm, dropout = dropout)
         self.f_d4__z4_k4_z5_k5 = f_d4__z4_k4_z5_k5(
                 Batch_Norm = Batch_Norm, dropout = dropout)
-        
-        self.p_y__k1 = p_y__k1(Batch_Norm = Batch_Norm, 
+
+        self.p_y__k1 = p_y__k1(Batch_Norm = Batch_Norm,
                 dropout = dropout)
-        
-        self.p_k1__k2 = p_k1__k2(Batch_Norm = Batch_Norm, 
+
+        self.p_k1__k2 = p_k1__k2(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_k2__k3 = p_k2__k3(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_k3__k4 = p_k3__k4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_k4__k5 = p_k4__k5(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_k5 = p_k5(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+
+        self.p_z1__z2 = p_z1__z2(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_z2__z3 = p_z2__z3(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_z3__z4 = p_z3__z4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_z4__z5 = p_z4__z5(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.p_z5 = p_z5(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+
+        self.f_e1__x = f_e1__x(Batch_Norm = Batch_Norm,
                 dropout = dropout)
-        self.p_k2__k3 = p_k2__k3(Batch_Norm = Batch_Norm, 
+        self.f_e2__e1 = f_e2__e1(Batch_Norm = Batch_Norm,
                 dropout = dropout)
-        self.p_k3__k4 = p_k3__k4(Batch_Norm = Batch_Norm, 
+        self.f_e3__e2 = f_e3__e2(Batch_Norm = Batch_Norm,
                 dropout = dropout)
-        self.p_k4__k5 = p_k4__k5(Batch_Norm = Batch_Norm, 
+        self.f_e4__e3 = f_e4__e3(Batch_Norm = Batch_Norm,
                 dropout = dropout)
-        self.p_k5 = p_k5(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
-        self.p_z1__z2 = p_z1__z2(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.p_z2__z3 = p_z2__z3(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.p_z3__z4 = p_z3__z4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.p_z4__z5 = p_z4__z5(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.p_z5 = p_z5(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
-        self.f_e1__x = f_e1__x(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.f_e2__e1 = f_e2__e1(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.f_e3__e2 = f_e3__e2(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.f_e4__e3 = f_e4__e3(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
-        self.q_z1__z2_e1 = q_z1__z2_e1(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_z2__z3_e2 = q_z2__z3_e2(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_z3__z4_e3 = q_z3__z4_e3(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_z4__z5_e4 = q_z4__z5_e4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_z5__e4 = q_z5__e4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
-        self.q_k1__k2_e1 = q_k1__k2_e1(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k2__k3_e2 = q_k2__k3_e2(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k3__k4_e3 = q_k3__k4_e3(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k4__k5_e4 = q_k4__k5_e4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k5__e4 = q_k5__e4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
-        self.q_k1__y = q_k1__y(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k2__k1 = q_k2__k1(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k3__k2 = q_k3__k2(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k4__k3 = q_k4__k3(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        self.q_k5__k4 = q_k5__k4(Batch_Norm = Batch_Norm, 
-                dropout = dropout)
-        
+
+        self.q_z1__z2_e1 = q_z1__z2_e1(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_z2__z3_e2 = q_z2__z3_e2(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_z3__z4_e3 = q_z3__z4_e3(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_z4__z5_e4 = q_z4__z5_e4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_z5__e4 = q_z5__e4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+
+        self.q_k1__k2_e1 = q_k1__k2_e1(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_k2__k3_e2 = q_k2__k3_e2(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_k3__k4_e3 = q_k3__k4_e3(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_k4__k5_e4 = q_k4__k5_e4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+        self.q_k5__e4 = q_k5__e4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+
+        self.q_k1__y = q_k1__y(Batch_Norm = Batch_Norm,
+                dropout=dropout,Kull = self.KL)
+        self.q_k2__k1 = q_k2__k1(Batch_Norm = Batch_Norm,
+                dropout=dropout,Kull = self.KL)
+        self.q_k3__k2 = q_k3__k2(Batch_Norm = Batch_Norm,
+                dropout=dropout,Kull = self.KL)
+        self.q_k4__k3 = q_k4__k3(Batch_Norm = Batch_Norm,
+                dropout=dropout,Kull = self.KL)
+        self.q_k5__k4 = q_k5__k4(Batch_Norm = Batch_Norm,
+                dropout = dropout,Kull = self.KL)
+
         self.iou = IouCoef()
-        self.cce = CategoricalCrossentropy() 
+        self.cce = CategoricalCrossentropy()
         self.bce = BinaryCrossentropy()
 
 
     def call(self,inputs):
         x_s,y_s,x_u = inputs
 
+        KL = self.KL
         #holds all the outputs
         out = {}
 
@@ -115,13 +117,13 @@ class Caerus(Model):
         out['k1_sample_s'] = self.q_k1__y(y_s)
         out['k2_sample_s'] = self.q_k2__k1(out['k1_sample_s'])
         out['k3_sample_s'] = self.q_k3__k2(out['k2_sample_s'])
-        out['k4_sample_s'] = self.q_k4__k3(out['k3_sample_s']) 
-        out['k5_sample_s'] = self.q_k5__k4(out['k4_sample_s']) 
+        out['k4_sample_s'] = self.q_k4__k3(out['k3_sample_s'])
+        out['k5_sample_s'] = self.q_k5__k4(out['k4_sample_s'])
 
         out['k5_sample_u'] = self.q_k5__e4(
-            (out['e4_u'])) 
+            (out['e4_u']))
         out['k4_sample_u'] = self.q_k4__k5_e4(
-                (out['k5_sample_u'],out['e4_u'])) 
+                (out['k5_sample_u'],out['e4_u']))
         out['k3_sample_u'] = self.q_k3__k4_e3(
                 (out['k4_sample_u'],out['e3_u']))
         out['k2_sample_u'] = self.q_k2__k3_e2(
@@ -130,9 +132,9 @@ class Caerus(Model):
                 (out['k2_sample_u'],out['e1_u']))
 
         out['z5_sample_u'] = self.q_z5__e4(
-                (out['e4_u'])) 
+                (out['e4_u']))
         out['z4_sample_u'] = self.q_z4__z5_e4(
-                (out['z5_sample_u'],out['e4_u'])) 
+                (out['z5_sample_u'],out['e4_u']))
         out['z3_sample_u'] = self.q_z3__z4_e3(
                 (out['z4_sample_u'],out['e3_u']))
         out['z2_sample_u'] = self.q_z2__z3_e2(
@@ -141,9 +143,9 @@ class Caerus(Model):
                 (out['z2_sample_u'],out['e1_u']))
 
         out['z5_sample_s'] = self.q_z5__e4(
-                (out['e4_s'])) 
+                (out['e4_s']))
         out['z4_sample_s'] = self.q_z4__z5_e4(
-                (out['z5_sample_s'],out['e4_s'])) 
+                (out['z5_sample_s'],out['e4_s']))
         out['z3_sample_s'] = self.q_z3__z4_e3(
                 (out['z4_sample_s'],out['e3_s']))
         out['z2_sample_s'] = self.q_z2__z3_e2(
@@ -174,8 +176,8 @@ class Caerus(Model):
         out['p_k4_u'] = self.p_k4__k5(
                 (out['k4_sample_u'],out['k5_sample_u']))
         out['p_k5_u'] = self.p_k5(out['k5_sample_u'])
-        
-        # included as outputs to ensure that the 
+
+                # included as outputs to ensure that the 
         # weights are traned
         out['p_z1_s'] = self.p_z1__z2(
                 (out['z1_sample_s'],out['z2_sample_s']))
@@ -186,7 +188,7 @@ class Caerus(Model):
         out['p_z4_s'] = self.p_z4__z5(
                 (out['z4_sample_s'],out['z5_sample_s']))
         out['p_z5_s'] = self.p_z5(out['z5_sample_s'])
-        
+
         # included as outputs to ensure that the 
         # weights are traned
         out['p_z1_u'] = self.p_z1__z2(
@@ -199,6 +201,7 @@ class Caerus(Model):
                 (out['z4_sample_u'],out['z5_sample_u']))
         out['p_z5_u'] = self.p_z5(out['z5_sample_u'])
 
+
         out['d4_s'] = self.f_d4__z4_k4_z5_k5(
                 (out['z4_sample_s'],out['k4_sample_s'],
                     out['z5_sample_s'],out['k5_sample_s']))
@@ -208,7 +211,7 @@ class Caerus(Model):
                 (out['d3_s'],out['z2_sample_s'],out['k2_sample_s']))
         out['d1_s'] = self.f_d1__d2_z1_k1(
                 (out['d2_s'],out['z1_sample_s'],out['k1_sample_s']))
-        
+
         out['d4_u'] = self.f_d4__z4_k4_z5_k5(
                 (out['z4_sample_u'],out['k4_sample_u'],
                     out['z5_sample_u'],out['k5_sample_u']))
@@ -226,7 +229,8 @@ class Caerus(Model):
         # DO NOT add it as an output
         # then the weight will get trained
         y_prediction = self.p_y__k1(out['k1_sample_u'])
-        
+        out['y_u_reconstructed'] = y_prediction
+    
         n_log_p_x__e1_u = self.bce(x_u,out['x_u_reconstructed'])
         n_log_p_x__e1_s = self.bce(x_s,out['x_s_reconstructed'])
         n_log_p_y__k1_s = self.cce(y_s,out['y_s_reconstructed'])
@@ -238,6 +242,13 @@ class Caerus(Model):
         self.add_loss(n_log_p_x__e1_u)
         self.add_loss(n_log_p_x__e1_s)
         self.add_loss(n_log_p_y__k1_s)
-        self.add_metric(iou,name= 'IOU', aggregation= 'mean') 
-        self.add_metric(true_iou,name= 'True IOU', aggregation= 'mean')
+        self.add_metric(n_log_p_x__e1_u,name = 'Un X Recon',aggregation = 'mean')
+        self.add_metric(n_log_p_x__e1_s,name = 'Sup X Recon',aggregation = 'mean')
+        self.add_metric(n_log_p_y__k1_s,name = 'Sup Y Recon',aggregation = 'mean')
+        self.add_metric(n_log_p_y__k1_s + n_log_p_x__e1_s+n_log_p_x__e1_u
+                ,name = 'All Recon',aggregation = 'mean')
+        self.add_metric(iou,name= 'Cross IOU', aggregation= 'mean')
+        self.add_metric(true_iou,name= 'Recon IOU', aggregation= 'mean')
+
         return out
+

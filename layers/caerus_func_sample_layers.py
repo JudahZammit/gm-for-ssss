@@ -461,10 +461,9 @@ class q_z5__e4(layers.Layer):
         z5_sample = self.sample((mean,logvar))
 
         log_q_z5__e4 = self.ll((z5_sample,mean,logvar))
-        #self.add_loss(log_q_z5__e4)
+        self.add_loss(log_q_z5__e4)
 
-
-        return mean
+        return z5_sample
 
 class q_k1__k2_e1(layers.Layer):
 
@@ -572,9 +571,9 @@ class q_k5__e4(layers.Layer):
         k5_sample = self.sample((mean,logvar))
 
         log_q_k5__k4 = self.ll((k5_sample,mean,logvar))
-        #self.add_loss(log_q_k5__k4)
+        self.add_loss(log_q_k5__k4)
         
-        return mean
+        return k5_sample
 
 
 class q_k1__y(layers.Layer):
@@ -683,7 +682,7 @@ class q_k5__k4(layers.Layer):
         k5_sample = self.sample((mean,logvar))
 
         log_q_k5__k4 = self.ll((k5_sample,mean,logvar))
-        #self.add_loss(log_q_k5__k4)
+        self.add_loss(log_q_k5__k4)
 
-        return mean
+        return k5_sample
 

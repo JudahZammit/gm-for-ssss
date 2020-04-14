@@ -16,8 +16,8 @@ from tensorflow.keras import backend as K
 
 class p_x__d1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_x__d1,self).__init__(name = 'd1--x')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'x--d1'):
+        super(p_x__d1,self).__init__(name = name)
 
         self.conv = layers.Conv2D(RGB,(1,1),
                 activation='sigmoid')
@@ -31,8 +31,8 @@ class p_x__d1(layers.Layer):
 
 class f_d1__d2_z1_k1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_d1__d2_z1_k1,self).__init__(name = 'z1-k1-d2--d1')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'd1--d2-z1-k1'):
+        super(f_d1__d2_z1_k1,self).__init__(name = name)
 
         self.decoder = PointDecoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
@@ -46,8 +46,8 @@ class f_d1__d2_z1_k1(layers.Layer):
 
 class f_d2__d3_z2_k2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_d2__d3_z2_k2,self).__init__(name = 'z2-k2-d3--d2')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'd2--z2-k2-d3'):
+        super(f_d2__d3_z2_k2,self).__init__(name = name)
 
         self.decoder = PointDecoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
@@ -61,8 +61,8 @@ class f_d2__d3_z2_k2(layers.Layer):
 
 class f_d3__d4_z3_k3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_d3__d4_z3_k3,self).__init__(name = 'z3-k3-d4--d3')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'd3--z3-k3-d4'):
+        super(f_d3__d4_z3_k3,self).__init__(name = name)
 
         self.decoder = PointDecoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
@@ -76,8 +76,8 @@ class f_d3__d4_z3_k3(layers.Layer):
 
 class f_d4__z4_k4_z5_k5(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_d4__z4_k4_z5_k5,self).__init__(name = 'z4-k4-z5-k5--d4')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'd4--z4-k4-z5-k5'):
+        super(f_d4__z4_k4_z5_k5,self).__init__(name = name)
 
         self.decoder = PointDecoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
@@ -91,8 +91,8 @@ class f_d4__z4_k4_z5_k5(layers.Layer):
 
 class p_y__k1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_y__k1,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'y--k1'):
+        super(p_y__k1,self).__init__(name = name)
 
         self.conv = layers.Conv2D(CLASSES,(1,1),
                 activation='softmax')
@@ -108,12 +108,12 @@ class p_y__k1(layers.Layer):
 
 class p_k1__k2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_k1__k2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k1--k2'):
+        super(p_k1__k2,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         k1_sample, k2_sample = inputs
@@ -128,12 +128,12 @@ class p_k1__k2(layers.Layer):
 
 class p_k2__k3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_k2__k3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k2--k3'):
+        super(p_k2__k3,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         k2_sample, k3_sample = inputs
@@ -148,12 +148,12 @@ class p_k2__k3(layers.Layer):
 
 class p_k3__k4(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_k3__k4,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k3--k4'):
+        super(p_k3__k4,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         k3_sample, k4_sample = inputs
@@ -168,12 +168,12 @@ class p_k3__k4(layers.Layer):
 
 class p_k4__k5(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_k4__k5,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k4--k5'):
+        super(p_k4__k5,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         k4_sample, k5_sample = inputs
@@ -188,8 +188,8 @@ class p_k4__k5(layers.Layer):
 
 class p_k5(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0):
-        super(p_k5,self).__init__(name = 'k5')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k5'):
+        super(p_k5,self).__init__(name = name)
 
         self.ll = UnitGaussianLL(Kull)
 
@@ -204,12 +204,12 @@ class p_k5(layers.Layer):
 
 class p_z1__z2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_z1__z2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z1--z2'):
+        super(p_z1__z2,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         z1_sample, z2_sample = inputs
@@ -224,12 +224,12 @@ class p_z1__z2(layers.Layer):
 
 class p_z2__z3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_z2__z3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z2--z3'):
+        super(p_z2__z3,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         z2_sample, z3_sample = inputs
@@ -244,12 +244,12 @@ class p_z2__z3(layers.Layer):
 
 class p_z3__z4(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_z3__z4,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z3--z4'):
+        super(p_z3__z4,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         z3_sample, z4_sample = inputs
@@ -264,12 +264,12 @@ class p_z3__z4(layers.Layer):
 
 class p_z4__z5(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(p_z4__z5,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z4--z5'):
+        super(p_z4__z5,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = False)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
 
     def call(self,inputs):
         z4_sample, z5_sample = inputs
@@ -284,8 +284,8 @@ class p_z4__z5(layers.Layer):
 
 class p_z5(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull=0):
-        super(p_z5,self).__init__(name = 'z5')
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull=0,name = 'z5'):
+        super(p_z5,self).__init__(name = name)
 
         self.ll = UnitGaussianLL(Kull)
 
@@ -300,8 +300,8 @@ class p_z5(layers.Layer):
 
 class f_e1__x(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_e1__x,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'e1--x'):
+        super(f_e1__x,self).__init__(name = name)
         
         self.encoder = PointEncoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm)
@@ -314,8 +314,8 @@ class f_e1__x(layers.Layer):
 
 class f_e2__e1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_e2__e1,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'e2--e1'):
+        super(f_e2__e1,self).__init__(name = name)
         
         self.encoder = PointEncoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm)
@@ -328,8 +328,8 @@ class f_e2__e1(layers.Layer):
 
 class f_e3__e2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_e3__e2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'e3--e2'):
+        super(f_e3__e2,self).__init__(name = name)
         
         self.encoder = PointEncoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm)
@@ -342,8 +342,8 @@ class f_e3__e2(layers.Layer):
 
 class f_e4__e3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(f_e4__e3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,name = 'e4--e3'):
+        super(f_e4__e3,self).__init__(name = name)
         
         self.encoder = PointEncoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm)
@@ -357,12 +357,12 @@ class f_e4__e3(layers.Layer):
 
 class q_z1__z2_e1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_z1__z2_e1,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z1--z2-e1'):
+        super(q_z1__z2_e1,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -373,18 +373,18 @@ class q_z1__z2_e1(layers.Layer):
         z1_sample = self.sample((mean,logvar))
 
         log_q_z1__z2_e1 = self.ll((z1_sample,mean,logvar))
-        self.add_loss(log_q_z1__z2_e1)
+        #self.add_loss(log_q_z1__z2_e1)
 
-        return z1_sample
+        return mean
 
 class q_z2__z3_e2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_z2__z3_e2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z2--z3-e2'):
+        super(q_z2__z3_e2,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -395,18 +395,18 @@ class q_z2__z3_e2(layers.Layer):
         z2_sample = self.sample((mean,logvar))
 
         log_q_z2__z3_e2 = self.ll((z2_sample,mean,logvar))
-        self.add_loss(log_q_z2__z3_e2)
+        #self.add_loss(log_q_z2__z3_e2)
 
-        return z2_sample
+        return mean
 
 class q_z3__z4_e3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_z3__z4_e3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z3--z4-e3'):
+        super(q_z3__z4_e3,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -417,18 +417,18 @@ class q_z3__z4_e3(layers.Layer):
         z3_sample = self.sample((mean,logvar))
 
         log_q_z3__z4_e3 = self.ll((z3_sample,mean,logvar))
-        self.add_loss(log_q_z3__z4_e3)
+        #self.add_loss(log_q_z3__z4_e3)
 
-        return z3_sample
+        return mean
 
 class q_z4__z5_e4(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_z4__z5_e4,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'z4--z5-e4'):
+        super(q_z4__z5_e4,self).__init__(name =  name)
 
         self.decoder = GaussianDecoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -439,9 +439,9 @@ class q_z4__z5_e4(layers.Layer):
         z4_sample = self.sample((mean,logvar))
 
         log_q_z4__z5_e4 = self.ll((z4_sample,mean,logvar))
-        self.add_loss(log_q_z4__z5_e4)
+        #self.add_loss(log_q_z4__z5_e4)
 
-        return z4_sample
+        return mean
 
 class q_z5__e4(layers.Layer):
 
@@ -468,12 +468,12 @@ class q_z5__e4(layers.Layer):
 
 class q_k1__k2_e1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k1__k2_e1,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k1--k2-e1'):
+        super(q_k1__k2_e1,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -484,18 +484,18 @@ class q_k1__k2_e1(layers.Layer):
         k1_sample = self.sample((mean,logvar))
 
         log_q_k1__k2_e1 = self.ll((k1_sample,mean,logvar))
-        self.add_loss(log_q_k1__k2_e1)
+        #self.add_loss(log_q_k1__k2_e1)
 
-        return k1_sample
+        return mean
 
 class q_k2__k3_e2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k2__k3_e2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k2--k3-e2'):
+        super(q_k2__k3_e2,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -506,18 +506,18 @@ class q_k2__k3_e2(layers.Layer):
         k2_sample = self.sample((mean,logvar))
 
         log_q_k2__k3_e2 = self.ll((k2_sample,mean,logvar))
-        self.add_loss(log_q_k2__k3_e2)
+        #self.add_loss(log_q_k2__k3_e2)
 
-        return k2_sample
+        return mean
 
 class q_k3__k4_e3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k3__k4_e3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k3--k4-e3'):
+        super(q_k3__k4_e3,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -528,18 +528,18 @@ class q_k3__k4_e3(layers.Layer):
         k3_sample = self.sample((mean,logvar))
 
         log_q_k3__k4_e3 = self.ll((k3_sample,mean,logvar))
-        self.add_loss(log_q_k3__k4_e3)
+        #self.add_loss(log_q_k3__k4_e3)
 
-        return k3_sample
+        return mean
 
 class q_k4__k5_e4(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k4__k5_e4,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k4--k5-e4'):
+        super(q_k4__k5_e4,self).__init__(name = name)
 
         self.decoder = GaussianDecoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm,Skip = True)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
 
     def call(self,inputs):
@@ -550,9 +550,9 @@ class q_k4__k5_e4(layers.Layer):
         k4_sample = self.sample((mean,logvar))
 
         log_q_k4__k5_e4 = self.ll((k4_sample,mean,logvar))
-        self.add_loss(log_q_k4__k5_e4)
+        #self.add_loss(log_q_k4__k5_e4)
 
-        return k4_sample
+        return mean
 
 class q_k5__e4(layers.Layer):
 
@@ -579,12 +579,12 @@ class q_k5__e4(layers.Layer):
 
 class q_k1__y(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k1__y,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k1--y'):
+        super(q_k1__y,self).__init__(name = name)
         
         self.encoder = GaussianEncoderLayer(16,dropout = dropout,
                 Batch_Norm = Batch_Norm)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
     
     def call(self,inputs):
@@ -595,18 +595,18 @@ class q_k1__y(layers.Layer):
         k1_sample = self.sample((mean,logvar))
 
         log_q_k1__y = self.ll((k1_sample,mean,logvar))
-        self.add_loss(log_q_k1__y)
+        #self.add_loss(log_q_k1__y)
 
-        return k1_sample
+        return mean
 
 class q_k2__k1(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k2__k1,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k2--k1'):
+        super(q_k2__k1,self).__init__(name = name)
         
         self.encoder = GaussianEncoderLayer(32,dropout = dropout,
                 Batch_Norm = Batch_Norm)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
     
     def call(self,inputs):
@@ -617,18 +617,18 @@ class q_k2__k1(layers.Layer):
         k2_sample = self.sample((mean,logvar))
 
         log_q_k2__k1 = self.ll((k2_sample,mean,logvar))
-        self.add_loss(log_q_k2__k1)
+        #self.add_loss(log_q_k2__k1)
 
-        return k2_sample
+        return mean
 
 class q_k3__k2(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k3__k2,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k3--k2'):
+        super(q_k3__k2,self).__init__(name = name)
         
         self.encoder = GaussianEncoderLayer(64,dropout = dropout,
                 Batch_Norm = Batch_Norm)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
     
     def call(self,inputs):
@@ -639,18 +639,18 @@ class q_k3__k2(layers.Layer):
         k3_sample = self.sample((mean,logvar))
 
         log_q_k3__k2 = self.ll((k3_sample,mean,logvar))
-        self.add_loss(log_q_k3__k2)
+        #self.add_loss(log_q_k3__k2)
 
-        return k3_sample
+        return mean
 
 class q_k4__k3(layers.Layer):
 
-    def __init__(self,dropout = 0.0,Batch_Norm = False):
-        super(q_k4__k3,self).__init__()
+    def __init__(self,dropout = 0.0,Batch_Norm = False,Kull = 0,name = 'k4--k3'):
+        super(q_k4__k3,self).__init__(name = name)
         
         self.encoder = GaussianEncoderLayer(128,dropout = dropout,
                 Batch_Norm = Batch_Norm)
-        self.ll = GaussianLL()
+        self.ll = GaussianLL(Kull)
         self.sample = GaussianSampling()
     
     def call(self,inputs):
@@ -661,9 +661,9 @@ class q_k4__k3(layers.Layer):
         k4_sample = self.sample((mean,logvar))
 
         log_q_k4__k3 = self.ll((k4_sample,mean,logvar))
-        self.add_loss(log_q_k4__k3)
+        #self.add_loss(log_q_k4__k3)
 
-        return k4_sample
+        return mean
 
 class q_k5__k4(layers.Layer):
 
